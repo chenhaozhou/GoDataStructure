@@ -24,51 +24,133 @@ func (t *Bst) Size() int {
 }
 
 func (t *Bst) Add(e int) {
-	t.root = Add(t.root, e)
-	t.size++
+	var ok bool
+	ok, t.root = Add(t.root, e)
+	if ok {
+		t.size++
+	}
 }
 
-func (t *Bst) Search(e int) bool {
+func (t *Bst) Contains(e int) bool {
 	return Search(t.root, e)
 }
 
+//前序遍历
 func (t *Bst) PreOrder() []int {
 	var res []int
 	return preOrder(t.root, res)
 }
 
+//后序遍历
 func (t *Bst) LasOrder() []int {
 	var res []int
 	return lasOrder(t.root, res)
 }
 
+//中序遍历
 func (t *Bst) MidOrder() []int {
 	var res []int
 	return midOrder(t.root, res)
 }
 
-func (t *Bst) FindMax() (bool, int) {
-	if nil == t {
-		return false, 0
+//层序遍历
+func (t *Bst) LevelOrder() []int {
+	var q []*node
+	var res []int
+	q = append(q, t.root)
+
+	for i := 0; i < t.size; i++ {
+		n := q[i]
+		if nil != n {
+			res = append(res, q[i].e)
+			if nil != n.left {
+				q = append(q, n.left)
+			}
+			if nil != n.right {
+				q = append(q, n.right)
+			}
+		}
 	}
+
+	return res
+}
+
+//寻找最大值
+func (t *Bst) FindMax() int {
 	node := t.root
 	for nil != node.right {
 		node = node.right
 	}
 
-	return true, node.e
+	return node.e
 }
 
-func (t *Bst) FindMin() (bool, int) {
-	if nil == t {
-		return false, 0
-	}
+//寻找最小值
+func (t *Bst) FindMin() int {
 	node := t.root
 	for nil != node.left {
 		node = node.left
 	}
 
-	return true, node.e
+	return node.e
+}
+
+func (t *Bst) Delete(v int) {
+	var ok bool
+	ok, t.root = del(t.root, v)
+	if ok {
+		t.size--
+	}
+}
+
+func del(n *node, v int) (bool, *node) {
+	var ok bool
+	if nil == n {
+		return false, nil
+	}
+
+	if n.e > v {
+		ok, n.left = del(n.left, v)
+	} else if n.e < v {
+		ok, n.right = del(n.right, v)
+	} else {
+		if nil == n.right {
+			newLeftNode := n.left
+			n = nil
+			return true, newLeftNode
+		} else if nil == n.left {
+			newRightNode := n.right
+			n = nil
+			return true, newRightNode
+		} else {
+			//找到待删除节点右子树最小节点
+			minNode, tNode := delMin(n.right)
+			minNode.left = n.left
+			minNode.right = tNode
+			n = nil
+			return true, minNode
+		}
+	}
+
+	return ok, n
+}
+
+func delMin(n *node) (*node, *node) {
+	var delNode *node
+
+	if nil == n {
+		return nil, nil
+	}
+
+	if nil == n.left && nil == n.right {
+		return n, nil
+	} else if nil == n.left {
+		return n, n.right
+	} else {
+		delNode, n.left = delMin(n.left)
+	}
+
+	return delNode, n.left
 }
 
 func midOrder(n *node, res []int) []int {
@@ -118,15 +200,18 @@ func Search(n *node, e int) bool {
 	}
 }
 
-func Add(n *node, e int) *node {
+func Add(n *node, e int) (bool, *node) {
+	var ok bool
 	if nil == n {
-		return &node{e: e, left: nil, right: nil}
+		return true, &node{e: e, left: nil, right: nil}
 	}
 
 	if n.e < e {
-		n.right = Add(n.right, e)
+		ok, n.right = Add(n.right, e)
 	} else if n.e > e {
-		n.left = Add(n.left, e)
+		ok, n.left = Add(n.left, e)
+	} else {
+		return false, n
 	}
-	return n
+	return ok, n
 }
