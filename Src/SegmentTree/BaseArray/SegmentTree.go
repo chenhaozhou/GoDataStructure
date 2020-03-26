@@ -1,4 +1,8 @@
-package SegmentTree
+package BaseArray
+
+import "../Merger"
+
+type merger Merger.Merger
 
 type segmentTree struct {
 	size    int
@@ -47,7 +51,7 @@ func (t *segmentTree) set(rootIdx int, OL int, OR int, setIdx int, e int) {
 		t.set(leftIdx, OL, mid, setIdx, e)
 	}
 
-	t.element[rootIdx] = t.merger.merge(t.element[leftIdx], t.element[rightIdx])
+	t.element[rootIdx] = t.merger.Merge(t.element[leftIdx], t.element[rightIdx])
 }
 
 func query(t *segmentTree, p int, OL int, OR int, L int, R int) int {
@@ -64,7 +68,7 @@ func query(t *segmentTree, p int, OL int, OR int, L int, R int) int {
 	} else {
 		LVal := query(t, leftChildIdx(p), OL, mid, L, mid)
 		RVal := query(t, rightChildIdx(p), mid+1, OR, mid+1, R)
-		return t.merger.merge(LVal, RVal)
+		return t.merger.Merge(LVal, RVal)
 	}
 
 }
@@ -80,7 +84,7 @@ func createSegmentTree(t *segmentTree, p int, c []int) int {
 		t.element[p] = c[0]
 		return t.element[p]
 	}
-	t.element[p] = t.merger.merge(createSegmentTree(t, leftChildIdx(p), c[:cLen/2]), createSegmentTree(t, rightChildIdx(p), c[cLen/2:]))
+	t.element[p] = t.merger.Merge(createSegmentTree(t, leftChildIdx(p), c[:cLen/2]), createSegmentTree(t, rightChildIdx(p), c[cLen/2:]))
 	return t.element[p]
 }
 

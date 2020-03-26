@@ -50,6 +50,40 @@ func (t *Trie) IsPrefix(prefix string) bool {
 	return true
 }
 
+func (t *Trie) Delete(word string) bool {
+	if "" == word {
+		return false
+	}
+	res := del(t.root, word)
+
+	if res {
+		t.size--
+	}
+
+	return res
+}
+
+func del(node *node, word string) bool {
+	if 0 == len(word) {
+		if false == node.isWord {
+			return false
+		} else {
+			node.isWord = false
+			return true
+		}
+	}
+	if _, ok := node.next[word[0]]; ok {
+		res := del(node.next[word[0]], word[1:])
+		child := node.next[word[0]]
+		if !child.isWord && len(child.next) == 0 {
+			delete(node.next, word[0])
+		}
+		return res
+	} else {
+		return false
+	}
+}
+
 func (t *Trie) GetSize() int {
 	return t.size
 }
